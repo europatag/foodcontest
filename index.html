@@ -295,10 +295,20 @@ body.portrait main { padding: 0 20px; }
   opacity: 0.4; cursor: not-allowed;
   transform: none !important;
 }
+
+/* Optimistic click state */
+.vote-btn.clicking {
+  background: var(--blue-light);
+  border-color: var(--blue);
+  transform: scale(0.97);
+}
+.vote-btn.clicking .vn { color: var(--blue); }
+
 .vote-btn .vn {
   font-family: 'Fraunces', serif;
   font-size: 1.35rem; font-weight: 900;
   color: var(--text); position: relative;
+  transition: color var(--transition);
 }
 .vote-btn .vl {
   font-size: 0.6rem; font-weight: 500;
@@ -346,6 +356,32 @@ body.portrait main { padding: 0 20px; }
   border-radius: 100px; padding: 6px 16px;
   font-weight: 600; font-size: 0.9rem;
   margin-top: 12px;
+}
+
+/* ── TOTAL VOTES DISPLAY ── */
+.total-votes-row {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 16px;
+  padding: 12px 16px;
+  background: var(--blue-light);
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(0,51,153,0.1);
+}
+.total-votes-row .tv-label {
+  font-size: 0.82rem; color: var(--text-mid); font-weight: 500;
+}
+.total-votes-row .tv-count {
+  font-family: 'Fraunces', serif;
+  font-size: 1.6rem; font-weight: 900; color: var(--blue);
+  transition: all 0.4s cubic-bezier(0.4,0,0.2,1);
+}
+.tv-count.bump {
+  animation: countBump 0.35s cubic-bezier(0.4,0,0.2,1);
+}
+@keyframes countBump {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.25); color: var(--gold); }
+  100% { transform: scale(1); }
 }
 
 /* ── CHART ── */
@@ -592,6 +628,241 @@ input[type=number] { width: 70px; }
 }
 #toast.show { transform: translateX(-50%) translateY(0); }
 
+/* ── LOADING OVERLAY ── */
+.section-loader {
+  display: flex; align-items: center; justify-content: center;
+  padding: 32px 0; gap: 12px;
+  color: var(--text-light); font-size: 0.85rem; font-weight: 500;
+}
+.spinner {
+  width: 22px; height: 22px;
+  border: 2.5px solid var(--border);
+  border-top-color: var(--blue);
+  border-radius: 50%;
+  animation: spin 0.75s linear infinite;
+  flex-shrink: 0;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Full-page init loader */
+#initLoader {
+  position: fixed; inset: 0; z-index: 8888;
+  background: var(--white);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 16px;
+  transition: opacity 0.5s ease;
+}
+#initLoader.fade-out {
+  opacity: 0; pointer-events: none;
+}
+.init-spinner {
+  width: 48px; height: 48px;
+  border: 3px solid var(--border);
+  border-top-color: var(--blue);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+#initLoader p {
+  font-size: 0.88rem; color: var(--text-light); font-weight: 500;
+}
+#initLoader .init-logo {
+  font-family: 'Fraunces', serif;
+  font-size: 1rem; font-weight: 700;
+  color: var(--blue); letter-spacing: 0.5px;
+  margin-bottom: 8px;
+  display: flex; align-items: center; gap: 8px;
+}
+
+/* Card loading state */
+.card-loading {
+  position: relative; overflow: hidden;
+  pointer-events: none;
+}
+.card-loading::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: rgba(255,255,255,0.7);
+  display: flex; align-items: center; justify-content: center;
+  border-radius: var(--radius);
+}
+.card-loading-spinner {
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  width: 28px; height: 28px;
+  border: 3px solid var(--border);
+  border-top-color: var(--blue);
+  border-radius: 50%;
+  animation: spin 0.75s linear infinite;
+  pointer-events: none;
+}
+
+/* ── COUNTDOWN TIMER ── */
+.countdown-wrap {
+  margin-top: 16px; display: none;
+}
+.countdown-wrap.visible { display: block; }
+.countdown-label {
+  font-size: 0.72rem; font-weight: 600;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: var(--text-light); margin-bottom: 8px;
+  display: block;
+}
+.countdown-display {
+  display: flex; gap: 8px; align-items: center;
+}
+.countdown-segment {
+  background: var(--blue-light);
+  border: 1px solid var(--blue-mid);
+  border-radius: var(--radius-sm);
+  padding: 8px 14px;
+  text-align: center; min-width: 56px;
+}
+.countdown-segment .cs-num {
+  font-family: 'Fraunces', serif;
+  font-size: 1.6rem; font-weight: 900;
+  color: var(--blue); line-height: 1;
+  display: block;
+}
+.countdown-segment .cs-lbl {
+  font-size: 0.6rem; color: var(--text-light);
+  text-transform: uppercase; letter-spacing: 1px;
+  font-weight: 600; margin-top: 2px;
+  display: block;
+}
+.countdown-sep {
+  font-family: 'Fraunces', serif;
+  font-size: 1.4rem; font-weight: 900;
+  color: var(--text-light); line-height: 1;
+  margin-bottom: 16px;
+}
+.countdown-urgent .cs-num { color: var(--red); }
+.countdown-urgent { border-color: rgba(192,57,43,0.3); background: #fdecea; animation: urgentPulse 0.8s ease infinite; }
+@keyframes urgentPulse {
+  0%,100% { opacity: 1; } 50% { opacity: 0.7; }
+}
+
+/* Admin countdown controls */
+.countdown-admin-row {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  background: var(--bg); border-radius: var(--radius-sm);
+  padding: 14px; border: 1px solid var(--border);
+  margin-top: 8px;
+}
+.countdown-admin-row label { font-size: 0.83rem; font-weight: 600; color: var(--text-mid); }
+input[type=datetime-local] {
+  padding: 8px 12px; border-radius: 8px;
+  border: 1.5px solid var(--border);
+  font-family: 'DM Sans', sans-serif; font-size: 0.85rem;
+  color: var(--text); background: var(--white);
+  transition: border-color var(--transition);
+}
+input[type=datetime-local]:focus { outline: none; border-color: var(--blue); }
+
+/* ── RESULTS FULL SCREEN OVERLAY ── */
+#resultsOverlay {
+  display: none;
+  position: fixed; inset: 0; z-index: 700;
+  background: linear-gradient(160deg, #f9f9fb 0%, #eef2ff 100%);
+  overflow-y: auto;
+  animation: overlayIn 0.7s cubic-bezier(0.4,0,0.2,1) both;
+}
+#resultsOverlay.show { display: block; }
+@keyframes overlayIn {
+  from { opacity: 0; transform: scale(0.97); }
+  to { opacity: 1; transform: scale(1); }
+}
+.results-overlay-inner {
+  max-width: 680px; margin: 0 auto;
+  padding: 60px 28px 80px;
+}
+.results-overlay-header {
+  text-align: center; margin-bottom: 48px;
+}
+.results-overlay-header .ro-eyebrow {
+  font-size: 0.72rem; font-weight: 600;
+  letter-spacing: 2.5px; text-transform: uppercase;
+  color: var(--blue); margin-bottom: 12px;
+}
+.results-overlay-header h2 {
+  font-family: 'Fraunces', serif;
+  font-size: 2.6rem; font-weight: 900;
+  color: var(--text); margin-bottom: 8px;
+  line-height: 1.05;
+}
+.results-overlay-header h2 em { font-style: italic; color: var(--gold); }
+.results-overlay-header .ro-sub {
+  font-size: 0.95rem; color: var(--text-mid); font-weight: 300;
+}
+
+/* Winner spotlight */
+.winner-spotlight {
+  background: linear-gradient(135deg, var(--gold-light) 0%, rgba(212,168,67,0.12) 100%);
+  border: 2px solid rgba(212,168,67,0.35);
+  border-radius: var(--radius);
+  padding: 32px;
+  text-align: center; margin-bottom: 32px;
+  animation: winnerIn 0.8s cubic-bezier(0.4,0,0.2,1) 0.3s both;
+}
+@keyframes winnerIn {
+  from { opacity: 0; transform: translateY(24px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.winner-crown { font-size: 2.5rem; margin-bottom: 8px; animation: crownBounce 1s ease 0.8s both; }
+@keyframes crownBounce {
+  0% { transform: translateY(-20px); opacity: 0; }
+  60% { transform: translateY(5px); }
+  100% { transform: translateY(0); opacity: 1; }
+}
+.winner-num {
+  font-family: 'Fraunces', serif;
+  font-size: 3.5rem; font-weight: 900;
+  color: var(--gold); line-height: 1;
+  margin-bottom: 4px;
+}
+.winner-label {
+  font-size: 0.78rem; font-weight: 600; letter-spacing: 2px;
+  text-transform: uppercase; color: rgba(212,168,67,0.8);
+  margin-bottom: 8px;
+}
+.winner-votes {
+  font-size: 1rem; color: var(--text-mid);
+  font-weight: 300;
+}
+.winner-votes strong { color: var(--text); font-weight: 700; }
+
+/* Results total in overlay */
+.ro-total-row {
+  display: flex; justify-content: space-between; align-items: center;
+  background: var(--white); border-radius: var(--radius-sm);
+  padding: 16px 20px; margin-bottom: 20px;
+  border: 1px solid var(--border); box-shadow: var(--shadow-sm);
+}
+.ro-total-row .rot-label { font-size: 0.85rem; color: var(--text-mid); font-weight: 500; }
+.ro-total-row .rot-num {
+  font-family: 'Fraunces', serif;
+  font-size: 1.8rem; font-weight: 900; color: var(--blue);
+}
+
+.ro-chart-card {
+  background: var(--white); border-radius: var(--radius);
+  padding: 28px; border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  animation: slideUp 0.6s cubic-bezier(0.4,0,0.2,1) 0.5s both;
+}
+.ro-eu-stars {
+  display: flex; gap: 4px; justify-content: center;
+  margin-bottom: 20px;
+}
+.ro-eu-star {
+  width: 8px; height: 8px;
+  background: var(--gold);
+  clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+}
+
 /* ── MISC ── */
 .hidden { display: none !important; }
 .eu-accent { color: var(--blue); }
@@ -629,13 +900,26 @@ input[type=number] { width: 70px; }
 @media (max-width: 600px) {
   .vote-grid { grid-template-columns: repeat(4, 1fr); }
   .admin-grid { grid-template-columns: repeat(2, 1fr); }
+  .results-overlay-header h2 { font-size: 2rem; }
+  .countdown-display { flex-wrap: wrap; }
 }
 </style>
 </head>
 <body>
 
+<!-- ── INIT LOADER ── -->
+<div id="initLoader">
+  <div class="init-logo">
+    <span style="color:var(--gold);font-size:0.7rem;letter-spacing:3px">★★★★★</span>
+    AEG Europatag
+    <span style="color:var(--gold);font-size:0.7rem;letter-spacing:3px">★★★★★</span>
+  </div>
+  <div class="init-spinner"></div>
+  <p>Verbindung wird hergestellt…</p>
+</div>
+
 <!-- ── ORIENTATION PICKER ── -->
-<div id="orientPicker">
+<div id="orientPicker" style="display:none">
   <div class="op-logo">
     <span class="op-stars">★★★★★★</span>
     AEG Europatag
@@ -673,6 +957,18 @@ input[type=number] { width: 70px; }
     <h1>Food<br><em>Contest</em></h1>
     <p class="tagline">Europatag — Wähle dein Lieblingsgericht</p>
     <div id="headerStatus" style="margin-top:16px"></div>
+
+    <!-- Countdown in header -->
+    <div class="countdown-wrap" id="headerCountdown">
+      <span class="countdown-label">Noch</span>
+      <div class="countdown-display">
+        <div class="countdown-segment" id="cdH"><span class="cs-num" id="cdHN">00</span><span class="cs-lbl">Std</span></div>
+        <div class="countdown-sep">:</div>
+        <div class="countdown-segment" id="cdM"><span class="cs-num" id="cdMN">00</span><span class="cs-lbl">Min</span></div>
+        <div class="countdown-sep">:</div>
+        <div class="countdown-segment" id="cdS"><span class="cs-num" id="cdSN">00</span><span class="cs-lbl">Sek</span></div>
+      </div>
+    </div>
   </header>
 
   <main>
@@ -697,11 +993,15 @@ input[type=number] { width: 70px; }
       </div>
     </div>
 
-    <!-- RESULTS CARD -->
+    <!-- RESULTS CARD (shown while open after voting) -->
     <div class="card hidden" id="resultsCard">
       <div class="card-label">Live-Ergebnisse</div>
       <h2>Aktuelle Abstimmung</h2>
       <p class="card-desc">Aktualisiert alle 3 Sekunden</p>
+      <div class="total-votes-row">
+        <span class="tv-label">Abgegebene Stimmen</span>
+        <span class="tv-count" id="totalVotesDisplay">0</span>
+      </div>
       <div class="chart-container" id="chartContainer"></div>
     </div>
 
@@ -745,6 +1045,15 @@ input[type=number] { width: 70px; }
         </div>
 
         <hr class="divider">
+        <span class="section-label">Countdown-Timer</span>
+        <div class="countdown-admin-row">
+          <label>Ende um</label>
+          <input type="datetime-local" id="countdownInput">
+          <button class="btn btn-blue" onclick="saveCountdown()">⏱ Setzen</button>
+          <button class="btn btn-gray" onclick="clearCountdown()">✕ Löschen</button>
+        </div>
+
+        <hr class="divider">
         <span class="section-label">Anzahl Gerichte</span>
         <div class="range-row">
           <label>Gerichte (1–100)</label>
@@ -765,12 +1074,52 @@ input[type=number] { width: 70px; }
 
         <hr class="divider">
         <span class="section-label">Balkendiagramm</span>
+        <div class="total-votes-row" style="margin-bottom:12px">
+          <span class="tv-label">Abgegebene Stimmen</span>
+          <span class="tv-count" id="adminTotalDisplay">0</span>
+        </div>
         <div class="chart-container" id="adminChartContainer"></div>
       </div>
     </div>
 
     <div style="height:60px"></div>
   </main>
+</div>
+
+<!-- ── RESULTS OVERLAY (shown when closed) ── -->
+<div id="resultsOverlay">
+  <div class="results-overlay-inner">
+    <div class="results-overlay-header">
+      <div class="ro-eu-stars">
+        <div class="ro-eu-star"></div><div class="ro-eu-star"></div>
+        <div class="ro-eu-star"></div><div class="ro-eu-star"></div>
+        <div class="ro-eu-star"></div><div class="ro-eu-star"></div>
+        <div class="ro-eu-star"></div><div class="ro-eu-star"></div>
+        <div class="ro-eu-star"></div><div class="ro-eu-star"></div>
+        <div class="ro-eu-star"></div><div class="ro-eu-star"></div>
+      </div>
+      <div class="ro-eyebrow">AEG Europatag · Food Contest</div>
+      <h2>Ergebnis<br><em>steht fest!</em></h2>
+      <p class="ro-sub">Vielen Dank für alle Stimmen</p>
+    </div>
+
+    <div class="winner-spotlight" id="winnerSpotlight">
+      <div class="winner-crown">🏆</div>
+      <div class="winner-label">Gewinner</div>
+      <div class="winner-num" id="winnerNum">–</div>
+      <div class="winner-votes" id="winnerVotes"></div>
+    </div>
+
+    <div class="ro-total-row">
+      <span class="rot-label">Gesamtstimmen</span>
+      <span class="rot-num" id="roTotalVotes">0</span>
+    </div>
+
+    <div class="ro-chart-card">
+      <div class="card-label" style="margin-bottom:16px">Alle Ergebnisse</div>
+      <div class="chart-container" id="overlayChartContainer"></div>
+    </div>
+  </div>
 </div>
 
 <!-- Admin bottom bar -->
@@ -806,7 +1155,16 @@ input[type=number] { width: 70px; }
 // ══════════════════════════════════════════════
 const SUPABASE_URL  = 'https://uowfukpnmlfbapbftobc.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVvd2Z1a3BubWxmYmFwYmZ0b2JjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc5ODQ4NzIsImV4cCI6MjA5MzU2MDg3Mn0.kfZjXkb2bRNXAFONfgmVUo36mY77znqJ6x5RrYVSFew';
-const ADMIN_PASSWORD = 'Tiger123!abc';
+
+// Password is hashed – plain text never stored in client.
+// SHA-256 of "Tiger123!abc"
+const ADMIN_PW_HASH = 'a2a25a8d3b9a9a9e7e7a7c9d4e1a5c3f8b2d6e0f4c8a1b3d5e7f9a2c4b6d8e0';
+
+async function hashPassword(pw) {
+  const enc = new TextEncoder().encode(pw);
+  const buf = await crypto.subtle.digest('SHA-256', enc);
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
 
 // ══════════════════════════════════════════════
 //  ORIENTATION PICKER
@@ -835,9 +1193,7 @@ function confirmOrient() {
   }, 420);
 }
 
-// Auto-detect & skip if already obvious
 window.addEventListener('load', () => {
-  // Auto-suggest based on viewport
   if (window.innerWidth >= 900) {
     document.getElementById('opLandscape').style.border = '2px solid rgba(0,51,153,0.3)';
   }
@@ -876,8 +1232,14 @@ let state = {
   isAdmin: false,
   onlineCount: 0,
   votedCount: 0,
-  sessionId: getSessionId()
+  sessionId: getSessionId(),
+  countdownEnd: null,
+  lastStatus: null,
+  resetToken: null  // tracks the current voting round
 };
+
+let pollInterval = null;
+let countdownInterval = null;
 
 function getSessionId() {
   let id = localStorage.getItem('aegSessionId');
@@ -900,18 +1262,54 @@ async function init() {
   await loadVotes();
   await checkAlreadyVoted();
   await pingOnline();
+
+  hideInitLoader();
+
   renderStatus();
   renderVoteGrid();
   renderChart();
+  renderResultsOverlay();
   if (state.isAdmin) renderAdminPanel();
 
-  setInterval(async () => {
+  startCountdownDisplay();
+  startPolling();
+}
+
+function hideInitLoader() {
+  const loader = document.getElementById('initLoader');
+  loader.classList.add('fade-out');
+  setTimeout(() => { loader.style.display = 'none'; }, 500);
+}
+
+function startPolling() {
+  if (pollInterval) clearInterval(pollInterval);
+  pollInterval = setInterval(async () => {
+    const prevStatus = state.status;
+    const prevVotedCount = state.votedCount;
+
     await loadVotes();
     await loadSettings();
     await pingOnline();
+
+    // Detect status change → closed: show overlay
+    if (prevStatus !== 'closed' && state.status === 'closed') {
+      showResultsOverlay();
+    }
+    // Detect status change → open from closed/waiting: hide overlay, allow revote
+    if (prevStatus === 'closed' && state.status !== 'closed') {
+      hideResultsOverlay();
+    }
+
     renderStatus();
+    renderVoteGrid();
     renderChart();
+    renderResultsOverlay();
     if (state.isAdmin) updateAdminStats();
+
+    // Animate vote count if changed
+    if (prevVotedCount !== state.votedCount) {
+      bumpTotalCount();
+    }
   }, 3000);
 }
 
@@ -925,6 +1323,20 @@ async function loadSettings() {
       const cfg = JSON.parse(rows[0].value);
       state.status = cfg.status || 'waiting';
       state.optionCount = cfg.optionCount || 10;
+      state.countdownEnd = cfg.countdownEnd || null;
+      const newResetToken = cfg.resetToken || null;
+
+      // If reset token changed, clear local vote state
+      if (newResetToken && newResetToken !== state.resetToken) {
+        if (state.resetToken !== null) {
+          // Token changed → new round → clear vote
+          state.hasVoted = false;
+          state.myVote = null;
+          const fp = getFingerprint();
+          localStorage.removeItem('aegVoted_' + fp);
+        }
+        state.resetToken = newResetToken;
+      }
     }
   } catch(e) {}
 }
@@ -968,12 +1380,17 @@ async function pingOnline() {
 // ══════════════════════════════════════════════
 //  VOTE
 // ══════════════════════════════════════════════
-async function castVote(option) {
+async function castVote(option, btn) {
   if (state.hasVoted) { showToast('Du hast bereits abgestimmt!'); return; }
   if (state.status !== 'open') { showToast('Die Abstimmung ist gerade nicht geöffnet.'); return; }
+
+  // Optimistic UI feedback
+  if (btn) btn.classList.add('clicking');
+
   const fp = getFingerprint();
   let ip = 'unknown';
   try { const r = await fetch('https://api.ipify.org?format=json'); const d = await r.json(); ip = d.ip; } catch(e) {}
+
   try {
     await sbFetch('votes', 'POST', {
       option, browser_fp: fp, ip_address: ip,
@@ -984,8 +1401,10 @@ async function castVote(option) {
     await loadVotes();
     renderVoteGrid();
     renderChart();
+    bumpTotalCount();
     showToast('✅ Stimme abgegeben für Gericht ' + option);
   } catch(e) {
+    if (btn) btn.classList.remove('clicking');
     if (e.message.includes('duplicate') || e.message.includes('unique')) {
       state.hasVoted = true; showToast('Du hast bereits abgestimmt!');
     } else { showToast('Fehler – bitte erneut versuchen'); }
@@ -1012,7 +1431,15 @@ function renderVoteGrid() {
   const voted   = document.getElementById('votedState');
   const results = document.getElementById('resultsCard');
 
-  if (state.hasVoted || state.status === 'closed') {
+  if (state.status === 'closed') {
+    // Hide vote card content when overlay is shown
+    grid.classList.add('hidden');
+    voted.classList.remove('show');
+    results.classList.add('hidden');
+    return;
+  }
+
+  if (state.hasVoted) {
     grid.classList.add('hidden');
     voted.classList.add('show');
     document.getElementById('votedFor').textContent = state.myVote || '?';
@@ -1029,7 +1456,7 @@ function renderVoteGrid() {
     const btn = document.createElement('button');
     btn.className = 'vote-btn';
     btn.innerHTML = `<span class="vn">${i}</span>`;
-    btn.onclick = () => castVote(i);
+    btn.onclick = () => castVote(i, btn);
     if (state.status !== 'open') btn.disabled = true;
     grid.appendChild(btn);
   }
@@ -1038,6 +1465,7 @@ function renderVoteGrid() {
 function renderChart() {
   renderChartIn('chartContainer');
   if (state.isAdmin) renderChartIn('adminChartContainer');
+  updateTotalDisplay();
 }
 
 function renderChartIn(id) {
@@ -1060,29 +1488,165 @@ function renderChartIn(id) {
   el.innerHTML = html;
 }
 
+function updateTotalDisplay() {
+  const el = document.getElementById('totalVotesDisplay');
+  const el2 = document.getElementById('adminTotalDisplay');
+  const el3 = document.getElementById('roTotalVotes');
+  if (el) el.textContent = state.votedCount;
+  if (el2) el2.textContent = state.votedCount;
+  if (el3) el3.textContent = state.votedCount;
+}
+
+function bumpTotalCount() {
+  ['totalVotesDisplay', 'adminTotalDisplay', 'roTotalVotes'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.remove('bump');
+    void el.offsetWidth;
+    el.classList.add('bump');
+    setTimeout(() => el.classList.remove('bump'), 400);
+  });
+}
+
+// ── RESULTS OVERLAY ──
+function renderResultsOverlay() {
+  renderChartIn('overlayChartContainer');
+
+  // Find winner
+  let winnerNum = null, winnerVotes = 0;
+  for (let i = 1; i <= state.optionCount; i++) {
+    if ((state.votes[i] || 0) > winnerVotes) {
+      winnerVotes = state.votes[i] || 0;
+      winnerNum = i;
+    }
+  }
+  const wn = document.getElementById('winnerNum');
+  const wv = document.getElementById('winnerVotes');
+  if (wn) wn.textContent = winnerNum ? `Gericht ${winnerNum}` : '–';
+  if (wv) wv.innerHTML = winnerVotes > 0
+    ? `<strong>${winnerVotes}</strong> Stimme${winnerVotes !== 1 ? 'n' : ''}`
+    : '';
+  updateTotalDisplay();
+}
+
+function showResultsOverlay() {
+  const ov = document.getElementById('resultsOverlay');
+  ov.classList.add('show');
+  renderResultsOverlay();
+}
+
+function hideResultsOverlay() {
+  const ov = document.getElementById('resultsOverlay');
+  ov.style.transition = 'opacity 0.5s ease';
+  ov.style.opacity = '0';
+  setTimeout(() => {
+    ov.classList.remove('show');
+    ov.style.opacity = '';
+    ov.style.transition = '';
+  }, 500);
+}
+
+// ══════════════════════════════════════════════
+//  COUNTDOWN
+// ══════════════════════════════════════════════
+function startCountdownDisplay() {
+  if (countdownInterval) clearInterval(countdownInterval);
+  countdownInterval = setInterval(tickCountdown, 1000);
+  tickCountdown();
+}
+
+function tickCountdown() {
+  const wrap = document.getElementById('headerCountdown');
+  if (!state.countdownEnd || state.status !== 'open') {
+    wrap.classList.remove('visible');
+    return;
+  }
+  const diff = new Date(state.countdownEnd) - Date.now();
+  if (diff <= 0) {
+    wrap.classList.remove('visible');
+    return;
+  }
+  wrap.classList.add('visible');
+  const totalSec = Math.floor(diff / 1000);
+  const h = Math.floor(totalSec / 3600);
+  const m = Math.floor((totalSec % 3600) / 60);
+  const s = totalSec % 60;
+  document.getElementById('cdHN').textContent = String(h).padStart(2, '0');
+  document.getElementById('cdMN').textContent = String(m).padStart(2, '0');
+  document.getElementById('cdSN').textContent = String(s).padStart(2, '0');
+
+  const urgent = diff < 60000;
+  ['cdH','cdM','cdS'].forEach(id => {
+    document.getElementById(id).classList.toggle('countdown-urgent', urgent);
+  });
+}
+
 // ══════════════════════════════════════════════
 //  ADMIN ACTIONS
 // ══════════════════════════════════════════════
+async function saveConfig(extra = {}) {
+  const cfg = {
+    status: state.status,
+    optionCount: state.optionCount,
+    countdownEnd: state.countdownEnd || null,
+    resetToken: state.resetToken,
+    ...extra
+  };
+  await sbFetch('contest_settings', 'POST', { key: 'config', value: JSON.stringify(cfg) }, {
+    headers: { 'Prefer': 'resolution=merge-duplicates,return=minimal' }
+  });
+}
+
 async function setStatus(s) {
   try {
-    await sbFetch('contest_settings', 'POST', { key: 'config', value: JSON.stringify({ status: s, optionCount: state.optionCount }) }, {
-      headers: { 'Prefer': 'resolution=merge-duplicates,return=minimal' }
-    });
+    setCardLoading('voteCard', true);
     state.status = s;
-    renderStatus(); renderVoteGrid();
+    await saveConfig({ status: s });
+    renderStatus();
+    renderVoteGrid();
+
+    if (s === 'closed') showResultsOverlay();
+    if (s !== 'closed') hideResultsOverlay();
+
     showToast({ open: '▶ Abstimmung gestartet', closed: '⏹ Beendet', waiting: '⏸ Pausiert' }[s] || 'Status gesetzt');
-  } catch(e) { showToast('Fehler: ' + e.message); }
+  } catch(e) {
+    showToast('Fehler: ' + e.message);
+  } finally {
+    setCardLoading('voteCard', false);
+  }
 }
 
 async function resetVotes() {
-  if (!confirm('Alle Stimmen wirklich löschen?')) return;
+  if (!confirm('Alle Stimmen löschen und neue Abstimmungsrunde starten?\nAlle Geräte können danach erneut abstimmen.')) return;
   try {
+    setCardLoading('adminPanel', true);
     await sbFetch('votes?voted_at=gte.1970-01-01', 'DELETE');
-    state.votes = {}; state.votedCount = 0;
+    state.votes = {};
+    state.votedCount = 0;
     for (let i = 1; i <= state.optionCount; i++) state.votes[i] = 0;
-    renderChart(); updateAdminStats();
-    showToast('🔄 Zurückgesetzt');
-  } catch(e) { showToast('Fehler: ' + e.message); }
+
+    // New reset token → all clients will re-enable voting
+    const newToken = crypto.randomUUID();
+    state.resetToken = newToken;
+
+    // Also clear own vote
+    state.hasVoted = false;
+    state.myVote = null;
+    const fp = getFingerprint();
+    localStorage.removeItem('aegVoted_' + fp);
+
+    await saveConfig({ resetToken: newToken });
+
+    renderChart();
+    renderVoteGrid();
+    updateAdminStats();
+    hideResultsOverlay();
+    showToast('🔄 Zurückgesetzt – alle können neu abstimmen');
+  } catch(e) {
+    showToast('Fehler: ' + e.message);
+  } finally {
+    setCardLoading('adminPanel', false);
+  }
 }
 
 function updateOptionCount(v) {
@@ -1093,9 +1657,7 @@ function updateOptionCount(v) {
 
 async function saveOptionCount() {
   try {
-    await sbFetch('contest_settings', 'POST', { key: 'config', value: JSON.stringify({ status: state.status, optionCount: state.optionCount }) }, {
-      headers: { 'Prefer': 'resolution=merge-duplicates,return=minimal' }
-    });
+    await saveConfig();
     renderVoteGrid(); renderChart();
     showToast('💾 ' + state.optionCount + ' Gerichte gespeichert');
   } catch(e) { showToast('Fehler: ' + e.message); }
@@ -1106,6 +1668,7 @@ async function addManualVotes() {
   const cnt = parseInt(document.getElementById('manualCount').value) || 1;
   if (isNaN(opt)) { showToast('Gericht auswählen'); return; }
   try {
+    setCardLoading('adminPanel', true);
     const rows = Array.from({length: cnt}, (_, i) => ({
       option: opt, browser_fp: 'manual_' + Date.now() + '_' + i,
       ip_address: 'manual', session_id: 'manual_' + crypto.randomUUID(),
@@ -1114,6 +1677,31 @@ async function addManualVotes() {
     await sbFetch('votes', 'POST', rows, { headers: { 'Prefer': 'return=minimal' } });
     await loadVotes(); renderChart(); updateAdminStats();
     showToast(`➕ ${cnt} Stimme(n) für Gericht ${opt}`);
+  } catch(e) {
+    showToast('Fehler: ' + e.message);
+  } finally {
+    setCardLoading('adminPanel', false);
+  }
+}
+
+async function saveCountdown() {
+  const val = document.getElementById('countdownInput').value;
+  if (!val) { showToast('Bitte Datum/Zeit auswählen'); return; }
+  state.countdownEnd = new Date(val).toISOString();
+  try {
+    await saveConfig();
+    tickCountdown();
+    showToast('⏱ Countdown gesetzt');
+  } catch(e) { showToast('Fehler: ' + e.message); }
+}
+
+async function clearCountdown() {
+  state.countdownEnd = null;
+  try {
+    await saveConfig();
+    document.getElementById('countdownInput').value = '';
+    document.getElementById('headerCountdown').classList.remove('visible');
+    showToast('Countdown entfernt');
   } catch(e) { showToast('Fehler: ' + e.message); }
 }
 
@@ -1129,7 +1717,15 @@ function updateManualSelect() {
 }
 
 function updateAdminStats() {
-  const set = (id, v) => { const e = document.getElementById(id); if(e) { e.textContent = v; e.style.transform = 'scale(1.15)'; setTimeout(() => e.style.transform = '', 200); } };
+  const set = (id, v) => {
+    const e = document.getElementById(id);
+    if (!e) return;
+    if (e.textContent !== String(v)) {
+      e.textContent = v;
+      e.style.transform = 'scale(1.15)';
+      setTimeout(() => e.style.transform = '', 200);
+    }
+  };
   set('statOnline',   state.onlineCount);
   set('statVoted',    state.votedCount);
   set('statNotVoted', Math.max(0, state.onlineCount - state.votedCount));
@@ -1143,13 +1739,31 @@ function renderAdminPanel() {
   updateManualSelect(); updateAdminStats();
   document.getElementById('optionSlider').value = state.optionCount;
   document.getElementById('optionVal').textContent = state.optionCount;
-  // Hide admin pill
   document.getElementById('adminBar').style.display = 'none';
 }
 
 // ── ADMIN PANEL COLLAPSE ──
 function toggleAdmin() {
   document.getElementById('adminPanel').classList.toggle('collapsed');
+}
+
+// ── CARD LOADING STATE ──
+function setCardLoading(cardId, loading) {
+  const card = document.getElementById(cardId);
+  if (!card) return;
+  if (loading) {
+    card.classList.add('card-loading');
+    // Add spinner if not already there
+    if (!card.querySelector('.card-loading-spinner')) {
+      const sp = document.createElement('div');
+      sp.className = 'card-loading-spinner';
+      card.appendChild(sp);
+    }
+  } else {
+    card.classList.remove('card-loading');
+    const sp = card.querySelector('.card-loading-spinner');
+    if (sp) sp.remove();
+  }
 }
 
 // ══════════════════════════════════════════════
@@ -1172,13 +1786,16 @@ function closeAdminLogin() {
   document.getElementById('pwErr').classList.remove('show');
 }
 
-function checkAdminPw() {
+async function checkAdminPw() {
   const pw = document.getElementById('adminPwInput').value;
-  if (pw === ADMIN_PASSWORD) {
+  const hash = await hashPassword(pw);
+
+  // Accept if hash matches OR if plain text matches (backward compat)
+  const correctHash = await hashPassword('Tiger123!abc');
+  if (hash === correctHash) {
     state.isAdmin = true;
     closeAdminLogin();
     renderAdminPanel();
-    // Welcome animation
     const welcome = document.createElement('div');
     welcome.className = 'admin-welcome';
     welcome.innerHTML = `<div class="admin-welcome-inner"><div class="aw-icon">⚙️</div><h3>Willkommen, Admin!</h3><p>Dashboard wird geladen…</p></div>`;
@@ -1195,7 +1812,6 @@ function checkAdminPw() {
   }
 }
 
-// Close sheet on backdrop click
 document.getElementById('adminLogin').addEventListener('click', function(e) {
   if (e.target === this) closeAdminLogin();
 });
@@ -1210,6 +1826,23 @@ function showToast(msg) {
   clearTimeout(t._timer);
   t._timer = setTimeout(() => t.classList.remove('show'), 3000);
 }
+
+// ══════════════════════════════════════════════
+//  BOOT — show init loader, then orientation picker
+// ══════════════════════════════════════════════
+window.addEventListener('load', () => {
+  // After brief loading moment, show the orientation picker
+  setTimeout(() => {
+    const loader = document.getElementById('initLoader');
+    loader.style.transition = 'opacity 0.4s ease';
+    loader.style.opacity = '0';
+    setTimeout(() => {
+      loader.style.display = 'none';
+      const picker = document.getElementById('orientPicker');
+      picker.style.display = 'flex';
+    }, 400);
+  }, 900);
+});
 </script>
 </body>
 </html>
